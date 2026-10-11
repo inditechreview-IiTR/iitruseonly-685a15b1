@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- DFINT parsing lives in src/lib/dfint.ts as pure, deterministic code that emits observations only, each with an exact source location — keeps findings traceable and testable.
+- Untrusted evidence sent to any model must go through buildUntrustedEnvelope — prevents indirect prompt injection.
