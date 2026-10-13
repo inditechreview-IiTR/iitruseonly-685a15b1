@@ -49,7 +49,8 @@ const PATTERNS: { type: IndicatorType; re: RegExp; validate?: (v: string) => boo
   { type: "domain", re: /\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}\b/gi },
 ];
 
-function sanitizeFileName(file: string): string {
+function sanitizeFileName(file: unknown): string {
+  if (typeof file !== "string") return "<inline>";
   const cleaned = file
     // eslint-disable-next-line no-control-regex -- intentionally strips C0 control chars from file names
     .replace(/[\u0000-\u001f]/g, "")
@@ -58,7 +59,7 @@ function sanitizeFileName(file: string): string {
   return cleaned.length > 0 ? cleaned : "<inline>";
 }
 
-export function parseEvidence(input: unknown, file = "<inline>"): ParseResult {
+export function parseEvidence(input: unknown, file: unknown = "<inline>"): ParseResult {
   const safeFile = sanitizeFileName(file);
   const errors: string[] = [];
   if (typeof input !== "string") {
