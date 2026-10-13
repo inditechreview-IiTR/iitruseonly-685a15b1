@@ -40,7 +40,8 @@ const PATTERNS: { type: IndicatorType; re: RegExp; validate?: (v: string) => boo
   {
     type: "ipv4",
     re: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
-    validate: (v) => v.split(".").every((p) => Number(p) <= 255 && !(p.length > 1 && p.startsWith("0"))),
+    validate: (v) =>
+      v.split(".").every((p) => Number(p) <= 255 && !(p.length > 1 && p.startsWith("0"))),
   },
   { type: "sha256", re: /\b[a-fA-F0-9]{64}\b/g },
   { type: "sha1", re: /\b[a-fA-F0-9]{40}\b/g },
@@ -49,7 +50,11 @@ const PATTERNS: { type: IndicatorType; re: RegExp; validate?: (v: string) => boo
 ];
 
 function sanitizeFileName(file: string): string {
-  const cleaned = file.replace(/[\u0000-\u001f]/g, "").trim().slice(0, 255);
+  // eslint-disable-next-line no-control-regex -- intentionally strips C0 control chars from file names
+  const cleaned = file
+    .replace(/[\u0000-\u001f]/g, "")
+    .trim()
+    .slice(0, 255);
   return cleaned.length > 0 ? cleaned : "<inline>";
 }
 
@@ -57,7 +62,15 @@ export function parseEvidence(input: unknown, file = "<inline>"): ParseResult {
   const safeFile = sanitizeFileName(file);
   const errors: string[] = [];
   if (typeof input !== "string") {
-    return { version: DFINT_VERSION, file: safeFile, inputLength: 0, lineCount: 0, truncated: false, findings: [], errors: ["Input must be a string"] };
+    return {
+      version: DFINT_VERSION,
+      file: safeFile,
+      inputLength: 0,
+      lineCount: 0,
+      truncated: false,
+      findings: [],
+      errors: ["Input must be a string"],
+    };
   }
   let text = input;
   let truncated = false;
@@ -89,7 +102,13 @@ export function parseEvidence(input: unknown, file = "<inline>"): ParseResult {
           kind: "observation",
           type,
           value,
-          location: { file: safeFile, line: i + 1, column: start + 1, offset: lineStart + start, length: value.length },
+          location: {
+            file: safeFile,
+            line: i + 1,
+            column: start + 1,
+            offset: lineStart + start,
+            length: value.length,
+          },
           context: line,
         });
         if (findings.length >= MAX_FINDINGS) {
@@ -103,7 +122,15 @@ export function parseEvidence(input: unknown, file = "<inline>"): ParseResult {
   }
 
   findings.sort((a, b) => a.location.offset - b.location.offset);
-  return { version: DFINT_VERSION, file: safeFile, inputLength: text.length, lineCount: lines.length, truncated, findings, errors };
+  return {
+    version: DFINT_VERSION,
+    file: safeFile,
+    inputLength: text.length,
+    lineCount: lines.length,
+    truncated,
+    findings,
+    errors,
+  };
 }
 
 /** Verifies a finding still matches its source exactly (traceability check). */
