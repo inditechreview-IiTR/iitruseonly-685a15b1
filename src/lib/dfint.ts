@@ -50,8 +50,8 @@ const PATTERNS: { type: IndicatorType; re: RegExp; validate?: (v: string) => boo
 ];
 
 function sanitizeFileName(file: string): string {
-  // eslint-disable-next-line no-control-regex -- intentionally strips C0 control chars from file names
   const cleaned = file
+    // eslint-disable-next-line no-control-regex -- intentionally strips C0 control chars from file names
     .replace(/[\u0000-\u001f]/g, "")
     .trim()
     .slice(0, 255);
